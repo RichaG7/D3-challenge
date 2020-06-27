@@ -3,10 +3,10 @@ var svgWidth = 960;
 var svgHeight = 500;
 
 var margin = {
-  top: 20,
-  right: 40,
-  bottom: 80,
-  left: 100
+    top: 20,
+    right: 40,
+    bottom: 80,
+    left: 100
 };
 
 var width = svgWidth - margin.left - margin.right;
@@ -14,16 +14,15 @@ var height = svgHeight - margin.top - margin.bottom;
 
 // Create an SVG wrapper, append an SVG group that will hold our chart,
 // and shift the latter by left and top margins.
-var svg = d3
-  .select("#scatter")
-  .append("svg")
-  .attr("width", svgWidth)
-  .attr("height", svgHeight);
+var svg = d3.select("#scatter")
+            .append("svg")
+            .attr("width", svgWidth)
+            .attr("height", svgHeight);
 
 // Append an SVG group
 
 var chartGroup = svg.append("g")
-  .attr("transform", `translate(${margin.left}, ${margin.top})`);
+                    .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
 // Set initial params
 
@@ -34,22 +33,22 @@ var chosenYAxis = 'obesity';
 
 function xScale(data, chosenXAxis) {
     var x_scale = d3.scaleLinear()
-        .domain([d3.min(data, d => d[chosenXAxis]) * 0.8,
-            d3.max(data, d => d[chosenXAxis] * 1.2)
-        ])
-        .range([0, width]); 
+                    .domain([d3.min(data, d => d[chosenXAxis]) * 0.8,
+                        d3.max(data, d => d[chosenXAxis] * 1.2)
+                    ])
+                    .range([0, width]); 
   
-      return x_scale;
+    return x_scale;
 };
   
 // Function to calculate y scale
 
 function yScale(data, chosenYAxis) {
     var y_scale = d3.scaleLinear()
-        .domain([d3.min(data, d => d[chosenYAxis]) *0.8,
-            d3.max(data, d => d[chosenYAxis]* 1.2)
-        ])
-        .range([height,0]);
+                    .domain([d3.min(data, d => d[chosenYAxis]) *0.8,
+                        d3.max(data, d => d[chosenYAxis]* 1.2)
+                    ])
+                    .range([height,0]);
   
     return y_scale;    
 };
@@ -123,44 +122,44 @@ function renderYTextLabels(textLabels, newYScale, chosenYAxis) {
 };
 
 function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
+    
+    var xlabel; 
+  
+    if (chosenXAxis === 'poverty') {
+        xlabel = 'Poverty:';
+    } else if (chosenXAxis === 'age') {
+        xlabel = 'Age:';
+    } else {
+        xlabel = 'Household Income:';
+    }
+  
+    var ylabel; 
+  
+    if (chosenYAxis === 'obesity') {
+        ylabel = 'Obesity:';
+    } else if (chosenYAxis === 'smokes') {
+        ylabel = 'Smokes:';
+    } else {
+        ylabel = 'Lacks Healthcare:'
+    }
+  
+    var toolTip = d3.tip()
+                    .attr("class", "tooltip")
+                    .offset([80, -60])
+                    .html(function(d) {
+                        return (`${d.state}<br>${xlabel} ${d[chosenXAxis]}<br>${ylabel} ${d[chosenYAxis]}`);
+                    });
       
-  var xlabel; 
+    circlesGroup.call(toolTip);
   
-  if (chosenXAxis === 'poverty') {
-      xlabel = 'Poverty:';
-  } else if (chosenXAxis === 'age') {
-      xlabel = 'Age:';
-  } else {
-      xlabel = 'Household Income:';
-  }
+    circlesGroup.on('mouseover', function(data) {
+                    toolTip.show(data);
+                })      
+                .on('mouseout', function(data,index) {
+                    toolTip.hide(data);
+                });
   
-  var ylabel; 
-  
-  if (chosenYAxis === 'obesity') {
-      ylabel = 'Obesity:';
-  } else if (chosenYAxis === 'smokes') {
-      ylabel = 'Smokes:';
-  } else {
-      ylabel = 'Lacks Healthcare:'
-  }
-  
-  var toolTip = d3.tip()
-    .attr("class", "tooltip")
-    .offset([80, -60])
-    .html(function(d) {
-        return (`${d.state}<br>${xlabel} ${d[chosenXAxis]}<br>${ylabel} ${d[chosenYAxis]}`);
-    });
-      
-  circlesGroup.call(toolTip);
-  
-  circlesGroup.on('mouseover', function(data) {
-                  toolTip.show(data);
-                  })      
-              .on('mouseout', function(data,index) {
-                  toolTip.hide(data);
-                  });
-  
-  return circlesGroup; 
+    return circlesGroup; 
 };
   
 d3.csv('assets/data/data.csv').then(function(data, err) {
